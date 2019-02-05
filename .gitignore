@@ -1,0 +1,6 @@
+*.jar
+.metadata/
+.recommenders/
+.project
+.classpath
+.settings/
