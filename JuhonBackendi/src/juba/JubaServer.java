@@ -40,7 +40,7 @@ public class JubaServer implements Runnable {
 				Socket connSock = servSock.accept();
 				// Somebody connected
 				InetAddress client = connSock.getInetAddress();
-				System.out.println("Connection from " + client +
+				System.out.print("Connection from " + client +
 						" aka. " + client.getHostName());
 	
 				BufferedReader input =
@@ -51,7 +51,7 @@ public class JubaServer implements Runnable {
 						new DataOutputStream(connSock.getOutputStream());
 				
 				httpReturn(input, output);
-				
+				System.out.println(" - Response sent.");
 				
 			} catch (IOException e) {
 				try {
@@ -90,13 +90,12 @@ public class JubaServer implements Runnable {
 					
 					//System.out.println("Searching for: " + cityKey); // OK
 					
-					output.writeBytes(CityKeyToData(cityKey));
+					output.writeBytes(httpHeader(200)+cityKeyToData(cityKey));
 
 				}
 				
 			}
-			
-			//output.writeBytes("<h1>TEST TEST 123 123 TEST TEST</h1>");
+
 			output.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -104,7 +103,39 @@ public class JubaServer implements Runnable {
 
 	}
 	
-	private String CityKeyToData(String cityKey) {
+	private String httpHeader(int code) {
+		String header = "HTTP/2.0 ";
+		
+		switch(code) {
+		case 200:
+			header += "200 OK";
+			break;
+		case 400:
+			header += "400 Bad Request";
+			break;
+		case 403:
+			header += "403 Forbidden";
+			break;
+		case 404:
+			header += "404 Not Found";
+			break;
+		case 500:
+			header += "500 Internal Server Error";
+			break;
+		case 501:
+			header += "501 Not Implemented";
+			break;
+		}
+		
+		header += "\r\n";
+		header += "Connection: close\r\n";
+		header += "content-type: application/json;charset=UTF-8\r\n";
+	    header += "Server: JUBA server\r\n\r\n";
+		
+		return header;
+	}
+	
+	private String cityKeyToData(String cityKey) {
 		// Add your databases here or elsewhere
 		// I guess this simulates GET FROM cities WHERE id = cityKey or something to that effect
 		String cityData = "";
