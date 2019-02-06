@@ -2,6 +2,9 @@ package juba;
 
 public class Main {
 
+	/**
+	 * @param Takes a value to be used as listening port, defaults to 80
+	 */
 	public static void main(String[] args) {
 		
 		int listenPort = 80;

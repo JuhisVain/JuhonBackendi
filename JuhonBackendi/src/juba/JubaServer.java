@@ -10,9 +10,13 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/**
+ * A single thread listening and responding through it's assigned port
+ *
+ */
 public class JubaServer implements Runnable {
 	
-	int listenPort;
+	private int listenPort;
 	
 	private String dataFolder = "data/";
 
@@ -31,8 +35,9 @@ public class JubaServer implements Runnable {
 			servSock = new ServerSocket(listenPort);
 		} catch (IOException e) {
 			e.printStackTrace();
+			return;
 		}
-		System.out.println("Bound to localhost.");
+		System.out.println("Thread listening to port " + listenPort);
 		
 		while(true) {
 			System.out.println("Waiting.");
@@ -52,7 +57,7 @@ public class JubaServer implements Runnable {
 				
 				httpReturn(input, output);
 				System.out.println(" - Response sent.");
-				
+
 			} catch (IOException e) {
 				try {
 					servSock.close();
@@ -61,12 +66,15 @@ public class JubaServer implements Runnable {
 				}
 				e.printStackTrace();
 			}
-
 		}
-		
-		
 	}
 
+	/**
+	 * Responds to http request
+	 * 
+	 * @param input BufferedReader from which to read request
+	 * @param output DataOutputStream to write response to
+	 */
 	private void httpReturn(BufferedReader input, DataOutputStream output) {
 			
 		try {
@@ -87,22 +95,22 @@ public class JubaServer implements Runnable {
 									inputString.indexOf(' ', bcqIndex));
 					
 					cityKey = cityKey.toUpperCase();
-					
-					//System.out.println("Searching for: " + cityKey); // OK
-					
 					output.writeBytes(httpHeader(200)+cityKeyToData(cityKey));
-
 				}
-				
 			}
 
 			output.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
 	
+	/**
+	 * http header mockup
+	 * 
+	 * @param code - HTTP header code
+	 * @return HTTP header as string
+	 */
 	private String httpHeader(int code) {
 		String header = "HTTP/2.0 ";
 		
@@ -135,9 +143,13 @@ public class JubaServer implements Runnable {
 		return header;
 	}
 	
+	/**
+	 * @param cityKey
+	 * @return Data in string form acquired using cityKey. Hopefully as JSON.
+	 */
 	private String cityKeyToData(String cityKey) {
 		// Add your databases here or elsewhere
-		// I guess this simulates GET FROM cities WHERE id = cityKey or something to that effect
+		// This simulates SELECT * FROM cities WHERE id='cityKey' or something to that effect
 		String cityData = "";
 		
 		try {
