@@ -55,7 +55,7 @@ public class JubaServer implements Runnable {
 				DataOutputStream output =
 						new DataOutputStream(connSock.getOutputStream());
 				
-				httpReturn(input, output);
+				httpReturn(client, input, output);
 				System.out.println(" - Response sent.");
 
 			} catch (IOException e) {
@@ -72,10 +72,11 @@ public class JubaServer implements Runnable {
 	/**
 	 * Responds to http request
 	 * 
+	 * @param client InetAddress of client
 	 * @param input BufferedReader from which to read request
 	 * @param output DataOutputStream to write response to
 	 */
-	private void httpReturn(BufferedReader input, DataOutputStream output) {
+	private void httpReturn(InetAddress client, BufferedReader input, DataOutputStream output) {
 			
 		try {
 			
@@ -96,7 +97,7 @@ public class JubaServer implements Runnable {
 					
 					cityKey = cityKey.toUpperCase();
 					
-					output.writeBytes(cityKeyToData(cityKey).getResponse());
+					output.writeBytes(cityKeyToData(cityKey, client).getResponse());
 				}
 			}
 
@@ -109,10 +110,11 @@ public class JubaServer implements Runnable {
 	/**
 	 * http header mockup
 	 * 
+	 * @param client InetAddress of client
 	 * @param code - HTTP header code
 	 * @return HTTP header as string
 	 */
-	private String httpHeader(int code) {
+	private String httpHeader(int code, InetAddress client) {
 		String header = "HTTP/2.0 ";
 		
 		switch(code) {
@@ -139,6 +141,8 @@ public class JubaServer implements Runnable {
 		header += "\r\n";
 		header += "Connection: close\r\n";
 		header += "content-type: application/json;charset=UTF-8\r\n";
+		//header += "Access-Control-Allow-Origin: " + client + "\r\n";
+		header += "Access-Control-Allow-Origin: *\r\n"; // danger! allows access to everyone
 	    header += "Server: JUBA server\r\n\r\n";
 		
 		return header;
@@ -146,9 +150,10 @@ public class JubaServer implements Runnable {
 	
 	/**
 	 * @param cityKey
+	 * @param client InetAddress of client
 	 * @return Data as cityDataResponse object
 	 */
-	private cityDataResponse cityKeyToData(String cityKey) {
+	private cityDataResponse cityKeyToData(String cityKey, InetAddress client) {
 		// Add your databases here or elsewhere
 		// This simulates SELECT * FROM cities WHERE id='cityKey' or something to that effect
 		String cityData = "";
@@ -164,12 +169,12 @@ public class JubaServer implements Runnable {
 			buffRead.close();
 			
 		} catch (FileNotFoundException e) {
-			return new cityDataResponse(404, "");
+			return new cityDataResponse(404, "", client);
 		} catch (IOException e) {
 			e.printStackTrace();
-			return new cityDataResponse(500, "");
+			return new cityDataResponse(500, "", client);
 		}
-		return new cityDataResponse(200, cityData);
+		return new cityDataResponse(200, cityData, client);
 	}
 	
 	/**
@@ -182,11 +187,11 @@ public class JubaServer implements Runnable {
 			return response;
 		}
 		
-		public cityDataResponse(int code, String data) {
+		public cityDataResponse(int code, String data, InetAddress client) {
 			if (code == 200) {
-				response = httpHeader(code) + data;
+				response = httpHeader(code, client) + data;
 			} else {
-				response = httpHeader(code);
+				response = httpHeader(code, client);
 			}
 		}
 	}
