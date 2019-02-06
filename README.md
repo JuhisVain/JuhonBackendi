@@ -1,13 +1,15 @@
 # JuhonBackendi
-WIP
-A rudimentary Java http server
 
-notes to self:
-test other than GET with this:
-curl -i -X POST -H 'test' http://localhost/
+### A rudimentary Java http server
 
-test GET:
+Requires superuser rights to run.
+java -jar jubatest.jar
+
+Can be tested through browser with: 
 localhost/weather?q=HELSINKI
 
-requires SU rights
-sudo java -jar jubatest.jar
+also works with queries 'ESPOO' and 'ROVANIEMI' and whatever else you place in data/ folder using the same form
+
+Only handles GET requests, Access-Control-Allow-Origin set to *.
+
+reactui/reactui has an ugly react thing that tries to connect to localhost
