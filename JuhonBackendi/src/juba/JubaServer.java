@@ -95,7 +95,8 @@ public class JubaServer implements Runnable {
 									inputString.indexOf(' ', bcqIndex));
 					
 					cityKey = cityKey.toUpperCase();
-					output.writeBytes(httpHeader(200)+cityKeyToData(cityKey));
+					
+					output.writeBytes(cityKeyToData(cityKey).getResponse());
 				}
 			}
 
@@ -145,9 +146,9 @@ public class JubaServer implements Runnable {
 	
 	/**
 	 * @param cityKey
-	 * @return Data in string form acquired using cityKey. Hopefully as JSON.
+	 * @return Data as cityDataResponse object
 	 */
-	private String cityKeyToData(String cityKey) {
+	private cityDataResponse cityKeyToData(String cityKey) {
 		// Add your databases here or elsewhere
 		// This simulates SELECT * FROM cities WHERE id='cityKey' or something to that effect
 		String cityData = "";
@@ -163,11 +164,30 @@ public class JubaServer implements Runnable {
 			buffRead.close();
 			
 		} catch (FileNotFoundException e) {
-			return "{\"error\":\"No such city\"}";
+			return new cityDataResponse(404, "");
 		} catch (IOException e) {
 			e.printStackTrace();
-			return "{\"error\":\"Strange error\"}";
+			return new cityDataResponse(500, "");
 		}
-		return cityData;
+		return new cityDataResponse(200, cityData);
+	}
+	
+	/**
+	 * Forms http messages
+	 */
+	private class cityDataResponse {
+		private String response;
+		
+		public String getResponse() {
+			return response;
+		}
+		
+		public cityDataResponse(int code, String data) {
+			if (code == 200) {
+				response = httpHeader(code) + data;
+			} else {
+				response = httpHeader(code);
+			}
+		}
 	}
 }
