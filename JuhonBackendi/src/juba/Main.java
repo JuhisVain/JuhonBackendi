@@ -17,8 +17,10 @@ public class Main {
 			System.out.println("Listen port not a number!");
 			return;
 		}
-		@SuppressWarnings("unused")
-		JubaServer server = new JubaServer(listenPort);
+		
+		Thread server = new Thread(new JubaServer(listenPort));
+		server.start();
+		
 	}
 
 	

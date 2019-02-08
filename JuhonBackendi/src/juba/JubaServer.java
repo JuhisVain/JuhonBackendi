@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
 /**
  * A single thread listening and responding through it's assigned port
@@ -17,7 +18,7 @@ import java.net.Socket;
 public class JubaServer implements Runnable {
 	
 	private int listenPort;
-	
+
 	private String dataFolder = "data/";
 
 	final private static String byCityQuery = "/weather?q=";
@@ -25,7 +26,6 @@ public class JubaServer implements Runnable {
 	
 	public JubaServer(int listenPort) {
 		this.listenPort = listenPort;
-		this.run();
 	}
 	
 	@Override
@@ -33,6 +33,9 @@ public class JubaServer implements Runnable {
 		ServerSocket servSock = null;
 		try {
 			servSock = new ServerSocket(listenPort);
+		} catch (SocketException e) {
+			System.out.println("Socket " +listenPort+ " already in use!");
+			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return;
